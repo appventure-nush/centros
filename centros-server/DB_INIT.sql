@@ -158,8 +158,17 @@ create table apply
     constraint FK_A_CO foreign key (uni_name, course_title) references course (uni_name, title)
 );
 
-delimiter //
 drop procedure if exists hasUserEntry;
+drop procedure if exists isCounsellor;
+drop procedure if exists requestMeeting;
+drop procedure if exists acceptMeeting;
+drop procedure if exists completeMeeting;
+drop procedure if exists cancelMeeting;
+drop procedure if exists addMajor;
+drop procedure if exists addHonour;
+drop procedure if exists completeReview;
+
+delimiter //
 create procedure hasUserEntry(in uid varchar(16), out res bool)
 begin
     select count(*)
@@ -168,7 +177,14 @@ begin
     where user_id = uid;
 end//
 
-drop procedure if exists requestMeeting;
+create procedure isCounsellor(in uid varchar(16), out res bool)
+begin
+    select count(*)
+    into res
+    from user
+    where user_id = uid and user_type = 'COUNSELLOR';
+end//
+
 create procedure requestMeeting(in student_id varchar(16), in description varchar(255), in date date,
                                 in start_time time, in end_time time)
 begin
@@ -176,7 +192,6 @@ begin
     values (student_id, 'PENDING', description, date, start_time, end_time);
 end//
 
-drop procedure if exists acceptMeeting;
 create procedure acceptMeeting(in m_id int, in c_id varchar(16), in ven varchar(127))
 begin
     update meeting
@@ -186,7 +201,6 @@ begin
     where meeting.meeting_id = m_id;
 end//
 
-drop procedure if exists completeMeeting;
 create procedure completeMeeting(in m_id int)
 begin
     update meeting set meeting_status = 'COMPLETED' where meeting_id = m_id;
@@ -199,21 +213,21 @@ begin
     update meeting set minutes_owner = @s_id where meeting_id = m_id;
 end//
 
-drop procedure if exists cancelMeeting;
+
 create procedure cancelMeeting(in m_id int, in reason varchar(255))
 begin
     insert into cancelled_meeting value (m_id, reason);
     update meeting set meeting_status = 'CANCELLED' where meeting_id = m_id;
 end//
 
-drop procedure if exists addMajor;
+
 create procedure addMajor(in student_id varchar(16), in subject_name char(64))
 begin
     select code into @code from subject where name = subject_name;
     insert into major value (student_id, @code);
 end//
 
-drop procedure if exists addHonour;
+
 create procedure addHonour(in student_id varchar(16), in subject_name char(64))
 begin
     select code into @code from subject where name = subject_name;

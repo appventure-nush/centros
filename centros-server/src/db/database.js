@@ -41,7 +41,7 @@ async function getUserMetadata(user_id) {
     return metadata
 }
 
-async function getAllMeetingsForStudent(student_id) {
+async function getAllMeetingsForUser(student_id) {
     const conn = await mysql.createConnection(config);
     const [rows, field] = await conn.execute(`select * from meeting_user_view where student_id = ?`, [student_id]);
     await conn.end();
@@ -105,6 +105,18 @@ async function hasUserEntry(user_id) {
     // output looks like: [ { '@res': 1 } ]
     return rows[0]['@res'] === 1;
 }
+
+
+async function isCounsellor(user_id) {
+    const conn = await mysql.createConnection(config);
+    await conn.execute('call isCounsellor(?, @res)', [user_id]);
+    const [rows, fields] = await conn.execute('select @res');
+    await conn.end();
+    handleError(rows)
+    // output looks like: [ { '@res': 1 } ]
+    return rows[0]['@res'] === 1;
+}
+
 
 async function checkIfAdmin(user_id) {
     const conn = await mysql.createConnection(config);
@@ -274,7 +286,7 @@ module.exports = {
     getUserMetadata,
     addHonour,
     addMajor,
-    getAllMeetingsForStudent,
+    getAllMeetingsForUser,
     declineMeeting,
     acceptMeeting,
     checkIfAdmin,

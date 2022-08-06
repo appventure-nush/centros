@@ -3,7 +3,7 @@
     <v-snackbar
         v-model="snackbarFlag"
     >
-      {{this.$store.state.snackbarText}}
+      {{ this.$store.state.snackbarText }}
       <template v-slot:action="{ attrs }">
         <v-btn
             color="error"
@@ -54,6 +54,15 @@
           <v-divider class="my-3" v-if="item.divider"></v-divider>
         </div>
       </v-list>
+
+      <template v-slot:append>
+        <div class="pa-2">
+          <v-btn block color="primary" target="_blank" href="https://forms.office.com/r/22BAnGHvir">
+            <v-icon left>mdi-alert-circle</v-icon>
+            Report Bug
+          </v-btn>
+        </div>
+      </template>
     </v-navigation-drawer>
 
     <v-app-bar
@@ -160,8 +169,14 @@ export default {
       {
         title: 'Calendar',
         icon: 'mdi-calendar',
-        divider: true,
+        divider: false,
         route: '/calendar'
+      },
+      {
+        title: 'Meetings',
+        icon: 'mdi-calendar-clock',
+        divider: true,
+        route: '/meetings'
       },
       {
         title: 'Profile',
@@ -181,12 +196,6 @@ export default {
       //   divider: false,
       //   route: '/files'
       // },
-      {
-        title: 'Meetings',
-        icon: 'mdi-calendar-clock',
-        divider: true,
-        route: '/meetings'
-      },
       {
         title: 'Guides',
         icon: 'mdi-book-open-variant',
