@@ -169,18 +169,18 @@ export default {
         divider: false,
         route: '/profile'
       },
-      {
-        title: 'Reviews',
-        icon: 'mdi-message-draw',
-        divider: false,
-        route: '/reviews'
-      },
-      {
-        title: 'Files',
-        icon: 'mdi-file',
-        divider: false,
-        route: '/files'
-      },
+      // {
+      //   title: 'Reviews',
+      //   icon: 'mdi-message-draw',
+      //   divider: false,
+      //   route: '/reviews'
+      // },
+      // {
+      //   title: 'Files',
+      //   icon: 'mdi-file',
+      //   divider: false,
+      //   route: '/files'
+      // },
       {
         title: 'Meetings',
         icon: 'mdi-calendar-clock',
@@ -193,12 +193,12 @@ export default {
         divider: false,
         route: '/guides'
       },
-      {
-        title: 'University',
-        icon: 'mdi-town-hall',
-        divider: false,
-        route: '/university'
-      }
+      // {
+      //   title: 'University',
+      //   icon: 'mdi-town-hall',
+      //   divider: false,
+      //   route: '/university'
+      // }
     ],
 
 
