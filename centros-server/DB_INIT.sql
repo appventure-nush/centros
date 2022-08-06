@@ -278,6 +278,7 @@ drop view if exists meeting_user_view;
 create view meeting_user_view as
 select user.name  as 'counsellor_name',
        user.email as 'counsellor_email',
+       user.user_id as 'counsellor_id',
        student_id,
        meeting.meeting_id,
        reason,

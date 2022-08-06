@@ -22,6 +22,7 @@ const {
     getCourses,
     submitReviewRequest,
     editMentorGroup, completeMeeting, getUserSharedDocument, completeReview, getStudentReview, getCounsellorReview,
+    isCounsellor, isCounsellor, getAllMeetingsForCounsellor,
 } = require("./db/database")
 const mime = require('mime-types')
 const {ErrorMessages} = require("./msal/errors");
@@ -271,7 +272,12 @@ const getRoutes = (mainController, authProvider, router) => {
     });
 
     router.get('/api/meeting/user', preChecks, async (req, res) => {
-        res.json(await getAllMeetingsForStudent(req.session.user_id))
+        let isCounsellor = await isCounsellor(req.session.user_id)
+        if (isCounsellor) {
+            res.json(await getAllMeetingsForCounsellor(req.session.user_id))
+        } else {
+            res.json(await getAllMeetingsForStudent(req.session.user_id))
+        }
     });
 
     router.post('/api/meeting/complete', preChecks, adminPreCheck, async (req, res) => {
