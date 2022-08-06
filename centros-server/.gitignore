@@ -104,4 +104,4 @@ typings/
 
 package-lock.json
 
-src/data
+src/data/*
