@@ -49,6 +49,14 @@ async function getAllMeetingsForStudent(student_id) {
     return rows;
 }
 
+async function getAllMeetingsForCounsellor(counsellor_id) {
+    const conn = await mysql.createConnection(config);
+    const [rows, field] = await conn.execute(`select * from meeting_user_view where counsellor_id = ?`, [counsellor_id]);
+    await conn.end();
+    handleError(rows)
+    return rows;
+}
+
 async function getAllScheduledMeetings() {
     const conn = await mysql.createConnection(config);
     const [rows, field] = await conn.execute(`select * from meeting_public_view`);
@@ -106,6 +114,18 @@ async function hasUserEntry(user_id) {
     return rows[0]['@res'] === 1;
 }
 
+
+async function isCounsellor(user_id) {
+    const conn = await mysql.createConnection(config);
+    await conn.execute('call isCounsellor(?, @res)', [user_id]);
+    const [rows, fields] = await conn.execute('select @res');
+    await conn.end();
+    handleError(rows)
+    // output looks like: [ { '@res': 1 } ]
+    return rows[0]['@res'] === 1;
+}
+
+
 async function checkIfAdmin(user_id) {
     const conn = await mysql.createConnection(config);
     const [rows, fields] = await conn.execute(`select * from user where user_id = ? and user_type <> 'STUDENT'`, [user_id]);
@@ -129,9 +149,18 @@ async function acceptMeeting(meeting_id, counsellor_id, venue) {
     return !handleError(rows);
 }
 
-async function declineMeeting(meeting_id, reason) {
+// get student who scheduled this meeting
+async function getStudentScheduler(meeting_id) {
     const conn = await mysql.createConnection(config);
-    const [rows, field] = await conn.execute(`call cancelMeeting(?,?)`, [meeting_id, reason]);
+    const [rows, fields] = await conn.execute(`select student_id from meeting where meeting_id = ?`, [meeting_id]);
+    await conn.end();
+    handleError(rows)
+    return rows
+}
+
+async function declineMeeting(meeting_id, reason, user_id) {
+    const conn = await mysql.createConnection(config);
+    const [rows, field] = await conn.execute(`call cancelMeeting(?,?,?)`, [meeting_id, reason, user_id]);
     await conn.end();
     return !handleError(rows);
 }
@@ -266,6 +295,7 @@ function handleError(rows) {
 
 
 module.exports = {
+    isCounsellor,
     hasUserEntry,
     getUniversity,
     registerStudent,
@@ -275,6 +305,7 @@ module.exports = {
     addHonour,
     addMajor,
     getAllMeetingsForStudent,
+    getAllMeetingsForCounsellor,
     declineMeeting,
     acceptMeeting,
     checkIfAdmin,
@@ -293,5 +324,6 @@ module.exports = {
     getUserSharedDocument,
     completeReview,
     getStudentReview,
-    getCounsellorReview
+    getCounsellorReview,
+    getStudentScheduler
 }

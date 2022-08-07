@@ -3,7 +3,7 @@
     <v-snackbar
         v-model="snackbarFlag"
     >
-      {{this.$store.state.snackbarText}}
+      {{ this.$store.state.snackbarText }}
       <template v-slot:action="{ attrs }">
         <v-btn
             color="error"
@@ -54,6 +54,15 @@
           <v-divider class="my-3" v-if="item.divider"></v-divider>
         </div>
       </v-list>
+
+      <template v-slot:append>
+        <div class="pa-2">
+          <v-btn block color="primary" target="_blank" href="https://forms.office.com/r/22BAnGHvir">
+            <v-icon left>mdi-alert-circle</v-icon>
+            Report Bug
+          </v-btn>
+        </div>
+      </template>
     </v-navigation-drawer>
 
     <v-app-bar
@@ -160,26 +169,8 @@ export default {
       {
         title: 'Calendar',
         icon: 'mdi-calendar',
-        divider: true,
+        divider: false,
         route: '/calendar'
-      },
-      {
-        title: 'Profile',
-        icon: 'mdi-account',
-        divider: false,
-        route: '/profile'
-      },
-      {
-        title: 'Reviews',
-        icon: 'mdi-message-draw',
-        divider: false,
-        route: '/reviews'
-      },
-      {
-        title: 'Files',
-        icon: 'mdi-file',
-        divider: false,
-        route: '/files'
       },
       {
         title: 'Meetings',
@@ -188,17 +179,35 @@ export default {
         route: '/meetings'
       },
       {
+        title: 'Profile',
+        icon: 'mdi-account',
+        divider: false,
+        route: '/profile'
+      },
+      // {
+      //   title: 'Reviews',
+      //   icon: 'mdi-message-draw',
+      //   divider: false,
+      //   route: '/reviews'
+      // },
+      // {
+      //   title: 'Files',
+      //   icon: 'mdi-file',
+      //   divider: false,
+      //   route: '/files'
+      // },
+      {
         title: 'Guides',
         icon: 'mdi-book-open-variant',
         divider: false,
         route: '/guides'
       },
-      {
-        title: 'University',
-        icon: 'mdi-town-hall',
-        divider: false,
-        route: '/university'
-      }
+      // {
+      //   title: 'University',
+      //   icon: 'mdi-town-hall',
+      //   divider: false,
+      //   route: '/university'
+      // }
     ],
 
 

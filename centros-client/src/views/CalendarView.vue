@@ -16,10 +16,10 @@
 
       <v-row dense no-gutters>
         <v-col>
-          <p>Drag on Calendar to start Booking</p>
+          <p>This site is for scheduling appointments with Mr West only. You can schedule appointments with Mr Alan <a
+              href="https://tinyurl.com/see-mr-allan">here</a></p>
         </v-col>
       </v-row>
-
 
       <v-row>
         <v-col>
@@ -63,8 +63,7 @@
                   event-overlap-mode="column"
                   v-model="targetDate"
                   style="height: auto; width: auto;"
-                  :type="mode.toLowerCase()"
-                  :weekdays="[1,2,3,4,5]"
+                  :type="mode"
                   :events="events"
                   color="primary"
                   :event-ripple="false"
@@ -78,6 +77,9 @@
                   interval-minutes="30"
                   first-interval="16"
                   interval-count="20">
+                <template v-slot:interval="{past, weekday}">
+                  <div class="fill-height" style="background: #f7f7f7" v-if="past || weekday === 0 || weekday === 6"></div>
+                </template>
               </v-calendar>
             </v-col>
           </v-row>
@@ -130,6 +132,10 @@
             </v-chip>
           </v-list-item>
         </v-list>
+        <v-card-actions v-if="showCancelMeetingActions">
+          <v-spacer></v-spacer>
+          <v-btn text color="error" @click="cancelDialog = true">Cancel</v-btn>
+        </v-card-actions>
         <v-card-actions v-if="showConfirmMeetingActions">
           <v-spacer></v-spacer>
           <v-btn text color="primary" @click="acceptDialog = true">Accept</v-btn>
@@ -343,9 +349,53 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-dialog
+        v-model="cancelDialog"
+        width="600"
+    >
+      <v-card>
+        <v-card-title class="font-weight-bold">
+          Cancel Meeting
+        </v-card-title>
+
+        <v-card-text>
+          <p>Please provide a short reason for cancelling the meeting.</p>
+          <v-form ref="cancelForm">
+            <v-text-field
+                outlined
+                prepend-icon="mdi-pencil"
+                v-model="reasonInput"
+                dense
+                :rules="[v => !!v || `Short reason is required`]"
+                label="Reason"
+            >
+            </v-text-field>
+          </v-form>
+        </v-card-text>
+
+        <v-divider></v-divider>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+              color="primary"
+              text
+              @click="submitCancelMeeting"
+          >
+            Confirm
+          </v-btn>
+
+          <v-btn
+              text
+              @click="closeCancelDialog"
+          >
+            Cancel
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
-
-
 </template>
 
 
@@ -389,16 +439,16 @@ export default {
     declineDialog: false,
     reasonInput: '',
     scheduleDialog: false,
+    cancelDialog: false,
 
     // models for meeting schedule
     ready: false,
-    mode: 'Week',
+    mode: 'week',
     showCreatePrompt: false,
     newMeeting: null,
     meetingStartTime: null,
     meetingEndTime: null,
     meetingDate: null,
-    mode_list: ['Month', 'Week'],
 
     // add event related models
     dragEvent: null,
@@ -407,6 +457,15 @@ export default {
     extendOriginal: null,
   }),
   computed: {
+    showCancelMeetingActions() {
+      if (!this.$store.state.user) return false
+      if (this.selectedEvent.meeting_status === 'SCHEDULED') {
+        return this.$store.state.user.isAdmin || this.selectedEvent.student_id === this.$store.state.user.user_id;
+      } else {
+        return this.selectedEvent.student_id === this.$store.state.user.user_id;
+      }
+    },
+
     showConfirmMeetingActions() {
       if (!this.$store.state.user) return false
       return this.$store.state.user.isAdmin && this.selectedEvent.meeting_status === 'PENDING'
@@ -471,9 +530,26 @@ export default {
         })
       }
     },
+    submitCancelMeeting() {
+      if (this.$refs.cancelForm.validate()) {
+        postDeclineMeeting(this.selectedEvent.meeting_id, this.reasonInput).then(res => {
+          this.closeCancelDialog()
+          if (res.success) {
+            this.$store.commit('showSnackbar', "Successfully cancelled meeting!")
+          } else {
+            this.$store.commit('showSnackbar', "There was an error cancelling the meeting :(")
+          }
+          this.reloadPublicMeetings()
+        })
+      }
+    },
     closeDeclineDialog() {
       this.$refs.declineForm.reset()
       this.declineDialog = false
+    },
+    closeCancelDialog() {
+      this.$refs.cancelForm.reset()
+      this.cancelDialog = false
     },
     closeScheduleDialog() {
       this.$refs.scheduleForm.reset()
@@ -533,7 +609,7 @@ export default {
     },
     changeCalendarMode() {
       if (this.mode === 'month') {
-        this.mode = 'Week'
+        this.mode = 'week'
       } else {
         this.mode = 'month'
       }
@@ -563,8 +639,8 @@ export default {
     },
     startTime(tms) {
       const mouse = this.toTime(tms)
-      const today = new Date();
-      if (mouse < today) {
+      const mouseDate = this.toDate(tms)
+      if (mouseDate < Date.now() || mouseDate.getDay() === 0 || mouseDate.getDay() === 6) {
         // this.$store.commit('showSnackbar', 'Stop Trying to Book a Meeting in the Past!')
         return
       }
@@ -585,8 +661,21 @@ export default {
           end: this.createStart + 30 * 60 * 1000,
           timed: true,
         }
-
         this.events.push(this.newMeeting)
+        this.checkForCollisions();
+      }
+    },
+
+    checkForCollisions() {
+      for (let i = 0; i < this.events.length - 1; i++) {
+        let x = this.events[i]
+        let st = new Date(x.start)
+        let ed = new Date(x.end)
+
+        if (!(this.newMeeting.end <= st.getTime() || this.newMeeting.start >= ed.getTime())) {
+          this.deleteNewMeeting();
+          break;
+        }
       }
     },
     mouseMove(tms) {
@@ -615,14 +704,13 @@ export default {
         // max duration of meeting is 30 * maxInterval minutes
         this.newMeeting.end = Math.min(end, this.createStart + maxContiguousMeetingInterval * 30 * 60 * 1000)
 
-        // check for collision with other events
-        // TODO: optimise
+        // limit drag so as to not collide with future events
         for (let i = 0; i < this.events.length - 1; i++) {
           let x = this.events[i]
           let st = new Date(x.start)
           let ed = new Date(x.end)
 
-          if (ed.getTime() < this.newMeeting.start) continue;
+          if (ed.getTime() <= this.newMeeting.start) continue;
           this.newMeeting.end = Math.min(this.newMeeting.end, st.getTime())
         }
       }
@@ -662,13 +750,16 @@ export default {
           : time + (roundDownTime - (time % roundDownTime))
     },
 
-    toTime(tms) {
-      return new Date(tms.year, tms.month - 1, tms.day, tms.hour, tms.minute).getTime()
+    toDate(tms) {
+      return new Date(tms.year, tms.month - 1, tms.day, tms.hour, tms.minute)
     },
 
+    toTime(tms) {
+      return this.toDate(tms).getTime()
+    },
 
     viewWeek() {
-      this.mode = "Week"
+      this.mode = "week"
     },
 
     getReadTime() {
@@ -729,5 +820,4 @@ export default {
 .v-calendar-daily_head-day-label {
   pointer-events: none;
 }
-
 </style>

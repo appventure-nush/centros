@@ -9,6 +9,7 @@ export async function getPublicMeetings() {
             for (const m of await req.json()) {
                 const event = {}
                 event.name = m.name
+                event.student_id = m.student_id
                 event.email = m.email
                 event.meeting_status = m.meeting_status
                 event.venue = m.venue
@@ -66,6 +67,7 @@ export async function postDeclineMeeting(meeting_id, reason) {
         headers: {"Content-type": "application/json; charset=UTF-8"},
         body: JSON.stringify(data)
     })).json()
+
     if (!res.success) {
         throw new Error(res.message);
     }

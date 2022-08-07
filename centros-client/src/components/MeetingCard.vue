@@ -89,7 +89,7 @@
 
         <v-card-text>
           <p>Please provide a short reason for cancelling the meeting.</p>
-          <v-form ref="declineForm">
+          <v-form ref="cancelForm">
             <v-text-field
                 outlined
                 prepend-icon="mdi-pencil"
@@ -142,7 +142,7 @@ export default {
 
   methods: {
     submitCancelMeeting() {
-      if (this.$refs.declineForm.validate()) {
+      if (this.$refs.cancelForm.validate()) {
         this.cancelDialog = false
         this.$emit('cancel', this.meetingId, this.reasonInput)
       }
