@@ -27,7 +27,7 @@ app.use(getRoutes(mainController, authProvider, express.Router()));
 // routing views from vue
 const history = require('connect-history-api-fallback');
 app.use(history({
-    verbose: true
+    verbose: false
 }))
 app.use('/', express.static(path.join(__dirname, 'dist')));
 
