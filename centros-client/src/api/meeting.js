@@ -66,6 +66,7 @@ export async function postDeclineMeeting(meeting_id, reason) {
         headers: {"Content-type": "application/json; charset=UTF-8"},
         body: JSON.stringify(data)
     })).json()
+
     if (!res.success) {
         throw new Error(res.message);
     }

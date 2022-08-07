@@ -149,9 +149,18 @@ async function acceptMeeting(meeting_id, counsellor_id, venue) {
     return !handleError(rows);
 }
 
-async function declineMeeting(meeting_id, reason) {
+// get student who scheduled this meeting
+async function getStudentScheduler(meeting_id) {
     const conn = await mysql.createConnection(config);
-    const [rows, field] = await conn.execute(`call cancelMeeting(?,?)`, [meeting_id, reason]);
+    const [rows, fields] = await conn.execute(`select student_id from meeting where meeting_id = ?`, [meeting_id]);
+    await conn.end();
+    handleError(rows)
+    return rows
+}
+
+async function declineMeeting(meeting_id, reason, user_id) {
+    const conn = await mysql.createConnection(config);
+    const [rows, field] = await conn.execute(`call cancelMeeting(?,?,?)`, [meeting_id, reason, user_id]);
     await conn.end();
     return !handleError(rows);
 }
@@ -315,5 +324,6 @@ module.exports = {
     getUserSharedDocument,
     completeReview,
     getStudentReview,
-    getCounsellorReview
+    getCounsellorReview,
+    getStudentScheduler
 }

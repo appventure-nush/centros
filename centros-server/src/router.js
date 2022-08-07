@@ -22,7 +22,7 @@ const {
     getCourses,
     submitReviewRequest,
     editMentorGroup, completeMeeting, getUserSharedDocument, completeReview, getStudentReview, getCounsellorReview,
-    isCounsellor, getAllMeetingsForCounsellor,
+    isCounsellor, getAllMeetingsForCounsellor, getStudentScheduler,
 } = require("./db/database")
 const mime = require('mime-types')
 const {ErrorMessages} = require("./msal/errors");
@@ -33,7 +33,7 @@ const getRoutes = (mainController, authProvider, router) => {
         // if (!req.session.isAdmin) {
         //     return res.status(401).send(ErrorMessages.NOT_PERMITTED);
         // } else {
-            next()
+        next()
         // }
     }
     const preChecks = [authProvider.isAuthenticated, authProvider.getToken, async (req, res, next) => {
@@ -272,8 +272,7 @@ const getRoutes = (mainController, authProvider, router) => {
     });
 
     router.get('/api/meeting/user', preChecks, async (req, res) => {
-        let counsellor = await isCounsellor(req.session.user_id)
-        if (counsellor) {
+        if (req.session.isAdmin) {
             res.json(await getAllMeetingsForCounsellor(req.session.user_id))
         } else {
             res.json(await getAllMeetingsForStudent(req.session.user_id))
@@ -302,7 +301,14 @@ const getRoutes = (mainController, authProvider, router) => {
 
     router.post('/api/meeting/decline', preChecks, async (req, res) => {
         let data = req.body
-        let success = await declineMeeting(data.meeting_id, data.reason)
+
+        let student_id = await getStudentScheduler(data.meeting_id)
+        if (req.session.user_id !== student_id && !req.session.isAdmin) {
+            res.json({success: false});
+            return;
+        }
+
+        let success = await declineMeeting(data.meeting_id, data.reason, req.session.user_id)
         if (success) {
             res.json({success: true});
         } else {

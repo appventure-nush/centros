@@ -12,7 +12,7 @@ create table house
 create table user
 (
     user_id         varchar(16) primary key,
-    user_type       enum ('STUDENT', 'COUNSELLOR') not null,
+    user_type       enum ('STUDENT', 'COUNSELLOR', 'SYSTEM') not null,
     name            varchar(127)                   not null,
     email           varchar(255)                   not null,
     graduation_year int,
@@ -52,10 +52,10 @@ create table document
 (
     owner_id         varchar(16),
     document_id      varchar(36), # uuid
-    file_name        varchar(255)                          not null,
+        file_name        varchar(255)                          not null,
     file_type        varchar(24)                           not null,
     # additional column that will be removed in future
-    link             varchar(255)                          not null,
+        link             varchar(255)                          not null,
     last_access_time time                                  not null,
     last_access_date date                                  not null,
     document_type    enum ('DOCUMENT', 'GUIDE', 'MINUTES') not null,
@@ -119,7 +119,9 @@ create table cancelled_meeting
 (
     meeting_id int primary key,
     reason     varchar(255),
-    constraint FK_C_MID foreign key (meeting_id) references meeting (meeting_id)
+    cancelled_by varchar(16) not null,
+    constraint FK_C_UID foreign key (cancelled_by) references user (user_id) on delete cascade on update cascade,
+    constraint FK_C_MID foreign key (meeting_id) references meeting (meeting_id) on delete cascade on update cascade
 );
 
 create table university
@@ -159,7 +161,6 @@ create table apply
 );
 
 drop procedure if exists hasUserEntry;
-drop procedure if exists isCounsellor;
 drop procedure if exists requestMeeting;
 drop procedure if exists acceptMeeting;
 drop procedure if exists completeMeeting;
@@ -177,67 +178,59 @@ begin
     where user_id = uid;
 end//
 
-create procedure isCounsellor(in uid varchar(16), out res bool)
-begin
-    select count(*)
-    into res
-    from user
-    where user_id = uid and user_type = 'COUNSELLOR';
-end//
-
 create procedure requestMeeting(in student_id varchar(16), in description varchar(255), in date date,
                                 in start_time time, in end_time time)
 begin
-    insert into meeting (student_id, meeting_status, description, date, start_time, end_time)
-    values (student_id, 'PENDING', description, date, start_time, end_time);
+insert into meeting (student_id, meeting_status, description, date, start_time, end_time)
+values (student_id, 'PENDING', description, date, start_time, end_time);
 end//
 
 create procedure acceptMeeting(in m_id int, in c_id varchar(16), in ven varchar(127))
 begin
-    update meeting
-    set meeting.meeting_status = 'SCHEDULED',
-        meeting.counsellor_id  = c_id,
-        meeting.venue          = ven
-    where meeting.meeting_id = m_id;
+update meeting
+set meeting.meeting_status = 'SCHEDULED',
+    meeting.counsellor_id  = c_id,
+    meeting.venue          = ven
+where meeting.meeting_id = m_id;
 end//
 
 create procedure completeMeeting(in m_id int)
 begin
-    update meeting set meeting_status = 'COMPLETED' where meeting_id = m_id;
-    set @doc_id := UUID();
-    select student_id from meeting where meeting_id = m_id into @s_id;
-    insert into document value (@s_id, @doc_id, concat('Minutes for Meeting #', m_id), 'docx',
-                                'https://nushighedu-my.sharepoint.com/:w:/g/personal/h1930006_nushigh_edu_sg/EYVfDP7IJxFIoSKNqxGCHrUB5xbu_EviO-zhF34-HG6YIQ?e=bOMsoK',
+update meeting set meeting_status = 'COMPLETED' where meeting_id = m_id;
+set @doc_id := UUID();
+select student_id from meeting where meeting_id = m_id into @s_id;
+insert into document value (@s_id, @doc_id, concat('Minutes for Meeting #', m_id), 'docx',
+                                'test',
                                 current_time, current_date, 'MINUTES');
-    update meeting set minutes_id = @doc_id where meeting_id = m_id;
-    update meeting set minutes_owner = @s_id where meeting_id = m_id;
+update meeting set minutes_id = @doc_id where meeting_id = m_id;
+update meeting set minutes_owner = @s_id where meeting_id = m_id;
 end//
 
 
-create procedure cancelMeeting(in m_id int, in reason varchar(255))
+create procedure cancelMeeting(in m_id int, in reason varchar(255), in cancelled_by varchar(16))
 begin
-    insert into cancelled_meeting value (m_id, reason);
-    update meeting set meeting_status = 'CANCELLED' where meeting_id = m_id;
+insert into cancelled_meeting value (m_id, reason, cancelled_by);
+update meeting set meeting_status = 'CANCELLED' where meeting_id = m_id;
 end//
 
 
 create procedure addMajor(in student_id varchar(16), in subject_name char(64))
 begin
-    select code into @code from subject where name = subject_name;
-    insert into major value (student_id, @code);
+select code into @code from subject where name = subject_name;
+insert into major value (student_id, @code);
 end//
 
 
 create procedure addHonour(in student_id varchar(16), in subject_name char(64))
 begin
-    select code into @code from subject where name = subject_name;
-    insert into honour value (student_id, @code);
+select code into @code from subject where name = subject_name;
+insert into honour value (student_id, @code);
 end//
 
 create procedure completeReview(in c_id varchar(16), in r_id varchar(36))
 begin
-    update review set status = 'REVIEWED' where review_id = r_id;
-    update review set counsellor_id = c_id where review_id = r_id;
+update review set status = 'REVIEWED' where review_id = r_id;
+update review set counsellor_id = c_id where review_id = r_id;
 end//
 
 delimiter ;
@@ -266,39 +259,39 @@ select meeting.venue,
        user.name,
        user.email,
        meeting_status,
-       date,
-       start_time,
-       end_time
-from meeting,
-     user
-where meeting_status <> 'CANCELLED'
-  and user.user_id = meeting.student_id;
+        date,
+        start_time,
+        end_time
+        from meeting,
+        user
+        where meeting_status <> 'CANCELLED'
+        and user.user_id = meeting.student_id;
 
 drop view if exists meeting_user_view;
 create view meeting_user_view as
 select user.name  as 'counsellor_name',
-       user.email as 'counsellor_email',
-       user.user_id as 'counsellor_id',
-       student_id,
+        user.email as 'counsellor_email',
+        user.user_id as 'counsellor_id',
+        student_id,
        meeting.meeting_id,
        reason,
        meeting_status,
        description,
        venue,
-       date,
-       start_time,
-       end_time
-from meeting
-         left join user on user.user_id = meeting.counsellor_id
-         left join cancelled_meeting cm on meeting.meeting_id = cm.meeting_id;
+        date,
+        start_time,
+        end_time
+        from meeting
+        left join user on user.user_id = meeting.counsellor_id
+        left join cancelled_meeting cm on meeting.meeting_id = cm.meeting_id;
 
 drop view if exists meeting_pending_view;
 create view meeting_pending_view as
 select meeting_id, user.name, user.email, description, date, start_time, end_time
-from meeting,
-     user
-where meeting.student_id = user.user_id
-  and meeting_status = 'PENDING';
+        from meeting,
+        user
+        where meeting.student_id = user.user_id
+        and meeting_status = 'PENDING';
 
 drop view if exists student_review_view;
 create view student_review_view as
@@ -338,11 +331,12 @@ create event cancel_past_meetings_event
         starts current_date
     do
     insert into cancelled_meeting
-    select meeting_id, 'system cancellation'
-    from meeting
-    where meeting.meeting_status = 'PENDING'
-      and meeting.date < current_date;
+select meeting_id, 'system cancellation', 'system'
+from meeting
+where meeting.meeting_status = 'PENDING'
+  and meeting.date < current_date;
 
+INSERT INTO user VALUES ('system', 'SYSTEM', 'Centros', 'centros@nushigh.edu.sg', NULL, NULL, NULL);
 INSERT INTO user VALUES ('nhsapu','COUNSELLOR','ALLAN PATRICK','nhsapu@nushigh.edu.sg',NULL,NULL,NULL);
 INSERT INTO user VALUES ('nhscsp','COUNSELLOR','CHEW SHUHUI PHYLLISCIA','nhscsp@nus.edu.sg',NULL,NULL,NULL);
 INSERT INTO user VALUES ('c.west6','COUNSELLOR','CHRISTOPHER ANDREW WEST','c.west6@nushigh.edu.sg',NULL,NULL,NULL);
