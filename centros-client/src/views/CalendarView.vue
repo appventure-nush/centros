@@ -132,6 +132,10 @@
             </v-chip>
           </v-list-item>
         </v-list>
+        <v-card-actions v-if="showCancelMeetingActions">
+          <v-spacer></v-spacer>
+          <v-btn text color="error" @click="cancelDialog = true">Cancel</v-btn>
+        </v-card-actions>
         <v-card-actions v-if="showConfirmMeetingActions">
           <v-spacer></v-spacer>
           <v-btn text color="primary" @click="acceptDialog = true">Accept</v-btn>
@@ -345,9 +349,53 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-dialog
+        v-model="cancelDialog"
+        width="600"
+    >
+      <v-card>
+        <v-card-title class="font-weight-bold">
+          Cancel Meeting
+        </v-card-title>
+
+        <v-card-text>
+          <p>Please provide a short reason for cancelling the meeting.</p>
+          <v-form ref="cancelForm">
+            <v-text-field
+                outlined
+                prepend-icon="mdi-pencil"
+                v-model="reasonInput"
+                dense
+                :rules="[v => !!v || `Short reason is required`]"
+                label="Reason"
+            >
+            </v-text-field>
+          </v-form>
+        </v-card-text>
+
+        <v-divider></v-divider>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+              color="primary"
+              text
+              @click="submitCancelMeeting"
+          >
+            Confirm
+          </v-btn>
+
+          <v-btn
+              text
+              @click="closeCancelDialog"
+          >
+            Cancel
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
-
-
 </template>
 
 
@@ -391,6 +439,7 @@ export default {
     declineDialog: false,
     reasonInput: '',
     scheduleDialog: false,
+    cancelDialog: false,
 
     // models for meeting schedule
     ready: false,
@@ -408,6 +457,15 @@ export default {
     extendOriginal: null,
   }),
   computed: {
+    showCancelMeetingActions() {
+      if (!this.$store.state.user) return false
+      if (this.selectedEvent.meeting_status === 'SCHEDULED') {
+        return this.$store.state.user.isAdmin || this.selectedEvent.student_id === this.$store.state.user.user_id;
+      } else {
+        return this.selectedEvent.student_id === this.$store.state.user.user_id;
+      }
+    },
+
     showConfirmMeetingActions() {
       if (!this.$store.state.user) return false
       return this.$store.state.user.isAdmin && this.selectedEvent.meeting_status === 'PENDING'
@@ -472,9 +530,26 @@ export default {
         })
       }
     },
+    submitCancelMeeting() {
+      if (this.$refs.cancelForm.validate()) {
+        postDeclineMeeting(this.selectedEvent.meeting_id, this.reasonInput).then(res => {
+          this.closeCancelDialog()
+          if (res.success) {
+            this.$store.commit('showSnackbar', "Successfully cancelled meeting!")
+          } else {
+            this.$store.commit('showSnackbar', "There was an error cancelling the meeting :(")
+          }
+          this.reloadPublicMeetings()
+        })
+      }
+    },
     closeDeclineDialog() {
       this.$refs.declineForm.reset()
       this.declineDialog = false
+    },
+    closeCancelDialog() {
+      this.$refs.cancelForm.reset()
+      this.cancelDialog = false
     },
     closeScheduleDialog() {
       this.$refs.scheduleForm.reset()
