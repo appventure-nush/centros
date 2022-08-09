@@ -78,7 +78,7 @@
                   first-interval="16"
                   interval-count="20">
                 <template v-slot:interval="{past, weekday}">
-                  <div class="fill-height" style="background: #f7f7f7" v-if="past || weekday === 0 || weekday === 6"></div>
+                  <div class="fill-height" style="background: #e6e6e6" v-if="past || weekday === 0 || weekday === 6"></div>
                 </template>
               </v-calendar>
             </v-col>
