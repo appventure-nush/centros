@@ -68,7 +68,7 @@ class ConfigurationUtils {
                         console.log(message);
                     },
                     piiLoggingEnabled: false, 
-                    logLevel: LogLevel.Warning,
+                    logLevel: LogLevel.VERBOSE,
                 }
             }
         } 
