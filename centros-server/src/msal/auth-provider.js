@@ -23,6 +23,7 @@ const {
 } = require('./errors');
 
 const constants = require('./constants');
+const {hasUserEntry, checkIfAdmin} = require("../db/database");
 
 /**
  * A simple wrapper around MSAL Node ConfidentialClientApplication object.
@@ -175,11 +176,20 @@ class AuthProvider {
 
                         if (this.tokenValidator.validateIdToken(tokenResponse.idTokenClaims)) {
 
-                            req.session.homeAccountId = tokenResponse.account.homeAccountId;
+                            // --- ID TOKEN --- //
 
+                            req.session.name = tokenResponse.account.name
+                            const email = tokenResponse.account.username
+                            req.session.email = email
+                            req.session.user_id = email.split('@')[0]
+                            req.session.hasRegistered = await hasUserEntry(req.session.user_id)
+                            req.session.isAdmin = await checkIfAdmin(req.session.user_id)
+                            req.session.isAuthenticated = true;
+
+                            // --- ID TOKEN --- //
                             // assign session variables
                             req.session.idTokenClaims = tokenResponse.idTokenClaims;
-                            req.session.isAuthenticated = true;
+                            req.session.homeAccountId = tokenResponse.account.homeAccountId;
 
                             // wait for a while for session data to be updated
                             let route = this.appSettings.settings.homePageRoute

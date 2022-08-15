@@ -28,36 +28,40 @@ const mime = require('mime-types')
 const {ErrorMessages} = require("./msal/errors");
 const {scheduleMeeting} = require("./db/database")
 const assert = require("assert");
+const constants = require("./msal/constants");
 const getRoutes = (mainController, authProvider, router) => {
     const adminPreCheck = async (req, res, next) => {
-        // if (!req.session.isAdmin) {
-        //     return res.status(401).send(ErrorMessages.NOT_PERMITTED);
-        // } else {
-        next()
-        // }
-    }
-    const preChecks = [authProvider.isAuthenticated, authProvider.getToken, async (req, res, next) => {
-        if (!!req.session && !!req.session.isAuthenticated) {
-            if (!req.session.name || !req.session.email || !req.session.user_id) {
-                // user data not stored, retrieving from microsoft
-                console.log("retrieve from microsoft")
-                let profile;
-                try {
-                    profile = await fetchManager.callAPI(req.app.locals.appSettings.resources.graphAPI.endpoint,
-                        req.session["graphAPI"].accessToken);
-                } catch (error) {
-                    console.log(error)
-                }
-                req.session.name = profile.displayName
-                req.session.email = profile.mail
-                req.session.user_id = profile.mail.split('@')[0]
-                req.session.hasRegistered = await hasUserEntry(req.session.user_id)
-                req.session.isAdmin = await checkIfAdmin(req.session.user_id)
-            }
-        }
-        req.session.save(function (err) {
+        if (!req.session.isAdmin) {
+            return res.status(401).send(ErrorMessages.NOT_PERMITTED);
+        } else {
             next()
-        })
+        }
+    }
+    const preChecks = [async (req, res, next) => {
+        if (req.session && req.session.isAuthenticated && req.session.name && req.session.email && req.session.user_id) {
+            next();
+        } else {
+            // insufficient information, prompt signin
+            res.redirect("/");
+        }
+
+        //---------------- ACCESS TOKEN BASED ---------------//
+        // let profile;
+        // try {
+        //     profile = await fetchManager.callAPI(req.app.locals.appSettings.resources.graphAPI.endpoint,
+        //         req.session["graphAPI"].accessToken);
+        // } catch (error) {
+        //     console.log(error)
+        // }
+        // req.session.name = profile.displayName
+        // req.session.email = profile.mail
+        // req.session.user_id = profile.mail.split('@')[0]
+        // req.session.hasRegistered = await hasUserEntry(req.session.user_id)
+        // req.session.isAdmin = await checkIfAdmin(req.session.user_id)
+        //---------------- ACCESS TOKEN BASED ---------------//
+        // req.session.save(function (err) {
+        //     next()
+        // })
     }]
 
     // authentication routes
@@ -118,20 +122,11 @@ const getRoutes = (mainController, authProvider, router) => {
             return;
         }
 
-        let profile;
-        try {
-            profile = await fetchManager.callAPI(req.app.locals.appSettings.resources.graphAPI.endpoint, req.session["graphAPI"].accessToken);
-        } catch (error) {
-            console.log(error)
-            res.json({success: false});
-            return;
-        }
-
         let currYear = new Date().getFullYear()
         let gradYear = currYear + (6 - data.year)
         let userId = req.session.user_id
         let mentorClassFormatted = 'M' + (currYear % 100) + data.year + data.mentorClass
-        let success = await registerStudent(userId, profile.displayName, profile.mail, gradYear, data.house, mentorClassFormatted)
+        let success = await registerStudent(userId, req.session.name, req.session.email, gradYear, data.house, mentorClassFormatted)
 
         for (const major of data.majors) {
             success = success && await addMajor(req.session.user_id, major)
