@@ -295,10 +295,14 @@ const getRoutes = (mainController, authProvider, router) => {
     });
 
     router.post('/api/meeting/decline', preChecks, async (req, res) => {
+        console.log(req.body)
         let data = req.body
 
-        let student_id = await getStudentScheduler(data.meeting_id)
+        let rows = await getStudentScheduler(data.meeting_id)
+        let student_id = rows.student_id
         if (req.session.user_id !== student_id && !req.session.isAdmin) {
+            console.log(student_id)
+            console.log(req.session.user_id)
             res.json({success: false});
             return;
         }

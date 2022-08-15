@@ -155,7 +155,7 @@ async function getStudentScheduler(meeting_id) {
     const [rows, fields] = await conn.execute(`select student_id from meeting where meeting_id = ?`, [meeting_id]);
     await conn.end();
     handleError(rows)
-    return rows
+    return rows[0]
 }
 
 async function declineMeeting(meeting_id, reason, user_id) {
