@@ -256,6 +256,7 @@ drop view if exists meeting_public_view;
 create view meeting_public_view as
 select meeting.venue,
        meeting.meeting_id,
+       meeting.description,
        user.name,
        user.email,
        user.user_id as 'student_id',

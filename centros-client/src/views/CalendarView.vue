@@ -7,17 +7,23 @@
         </v-col>
       </v-row>
 
+<!--      <v-row dense no-gutters>-->
+<!--        <v-col>-->
+<!--          <p>Last Updated: {{ getReadTime() }}</p>-->
+<!--        </v-col>-->
+<!--      </v-row>-->
+
+
       <v-row dense no-gutters>
         <v-col>
-          <p>Last Updated: {{ getReadTime() }}</p>
+          <p>This site is for scheduling appointments with Mr West only. You can schedule appointments with Mr Allan <a
+              href="https://tinyurl.com/see-mr-allan">here</a></p>
         </v-col>
       </v-row>
 
-
       <v-row dense no-gutters>
         <v-col>
-          <p>This site is for scheduling appointments with Mr West only. You can schedule appointments with Mr Alan <a
-              href="https://tinyurl.com/see-mr-allan">here</a></p>
+          <p>Canteen College Counselling - Find Mr West at the canteen at 1130-1300, say hello, and ask questions about your university journeys and dreams.</p>
         </v-col>
       </v-row>
 
@@ -75,8 +81,8 @@
                   @mouseup:time="endDrag"
                   @mouseleave.native="cancelDrag"
                   interval-minutes="30"
-                  first-interval="16"
-                  interval-count="20">
+                  first-interval="15"
+                  interval-count="19">
                 <template v-slot:interval="{past, weekday}">
                   <div class="fill-height" style="background: #e6e6e6" v-if="past || weekday === 0 || weekday === 6"></div>
                 </template>
@@ -86,6 +92,8 @@
         </v-col>
       </v-row>
     </div>
+
+    <div style="height: 60px"></div>
 
     <v-menu
         v-model="selectedOpen"
@@ -108,6 +116,13 @@
               <v-list-item-subtitle>{{ selectedEvent.email }}</v-list-item-subtitle>
             </v-list-item-content>
           </v-list-item>
+          <v-list-item>
+            <v-list-item-icon>
+              <v-icon>mdi-text</v-icon>
+            </v-list-item-icon>
+            <v-list-item-content>{{ selectedEvent.description }}</v-list-item-content>
+          </v-list-item>
+
           <v-list-item v-if="selectedEvent.venue">
             <v-list-item-icon>
               <v-icon>mdi-map-marker</v-icon>
@@ -125,6 +140,7 @@
               </v-list-item-subtitle>
             </v-list-item-content>
           </v-list-item>
+
           <v-list-item>
             <v-chip :color="meetingStatusToColor[selectedEvent.meeting_status]"
                     text-color="white">
@@ -637,6 +653,7 @@ export default {
         this.extendOriginal = null
       }
     },
+
     startTime(tms) {
       const mouse = this.toTime(tms)
       const mouseDate = this.toDate(tms)

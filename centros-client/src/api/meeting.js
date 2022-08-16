@@ -13,6 +13,7 @@ export async function getPublicMeetings() {
                 event.email = m.email
                 event.meeting_status = m.meeting_status
                 event.venue = m.venue
+                event.description = m.description
                 let date = new Date(m.date)
                 event.date = getMysqlFormattedDate(date)
                 event.start = getMysqlFormattedDate(date) + " " + m.start_time

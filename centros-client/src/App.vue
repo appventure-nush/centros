@@ -162,6 +162,10 @@ export default {
       this.$store.commit("user", data)
     })
   },
+  created(){
+    document.title = "Centros"
+  },
+
 
   data: () => ({
     show: false,
