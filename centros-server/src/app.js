@@ -18,17 +18,20 @@ app.locals = {
 app.use(express.json())
 
 // user session
-const sessionStore = require('./db/sessionStore')
-app.use(session({ secret: process.env.SESSION_SECRET, store: sessionStore, resave: false, saveUninitialized: false }));
 
-// set up routes with authentication
+const sessionStore = require('./db/sessionStore')
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    store: sessionStore,
+    resave: false,
+    saveUninitialized: false
+}));
+
 app.use(getRoutes(mainController, authProvider, express.Router()));
 
 // routing views from vue
 const history = require('connect-history-api-fallback');
-app.use(history({
-    verbose: false
-}))
+app.use(history({verbose: true}))
 app.use('/', express.static(path.join(__dirname, 'dist')));
 
 
@@ -36,7 +39,7 @@ app.use('/', express.static(path.join(__dirname, 'dist')));
 // app.use(express.static(path.join(__dirname, './public')));
 // app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')));
 // app.use('/js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')));
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({extended: false}));
 
 // View engine
 // app.set('views', path.join(__dirname, './views'));

@@ -159,6 +159,9 @@ export default {
 
   mounted() {
     getUserData().then(data => {
+      if (data === null && this.$route.name !== '/') {
+        this.$router.replace('/')
+      }
       this.$store.commit("user", data)
     })
   },

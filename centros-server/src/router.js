@@ -1,4 +1,3 @@
-const fetchManager = require("./utils/fetchManager");
 const {
     addCourse,
     hasUserEntry,
@@ -12,7 +11,6 @@ const {
     getAllMeetingsForStudent,
     declineMeeting,
     acceptMeeting,
-    checkIfAdmin,
     getCategories,
     addCategory,
     addDocument,
@@ -37,13 +35,7 @@ const getRoutes = (mainController, authProvider, router) => {
             next()
         }
     }
-    const preChecks = [async (req, res, next) => {
-        if (req.session && req.session.isAuthenticated && req.session.name && req.session.email && req.session.user_id) {
-            next();
-        } else {
-            // insufficient information, prompt signin
-            res.redirect("/");
-        }
+    const preChecks = [
 
         //---------------- ACCESS TOKEN BASED ---------------//
         // let profile;
@@ -62,7 +54,7 @@ const getRoutes = (mainController, authProvider, router) => {
         // req.session.save(function (err) {
         //     next()
         // })
-    }]
+    ];
 
     // authentication routes
     router.get('/signin', authProvider.signIn);
