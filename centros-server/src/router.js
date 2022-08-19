@@ -93,7 +93,7 @@ const getRoutes = (mainController, authProvider, router) => {
 
     //api route
     router.get('/api/me', preChecks, async (req, res) => {
-        if (!!req.session.name && !!req.session.email && !!req.session.user_id && !!req.session.hasRegistered && req.session.hasOwnProperty('isAdmin')) {
+        if (!!req.session.name && !!req.session.email && !!req.session.user_id && req.session.hasOwnProperty('hasRegistered') && req.session.hasOwnProperty('isAdmin')) {
             // we already have user data in session storage
             res.json({
                 name: req.session.name,
