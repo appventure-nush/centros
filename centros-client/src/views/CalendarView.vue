@@ -349,18 +349,18 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
+              text
+              @click="completeDialog = false"
+          >
+            Cancel
+          </v-btn>
+
+          <v-btn
               color="primary"
               text
               @click="submitCompleteMeeting"
           >
             Confirm
-          </v-btn>
-
-          <v-btn
-              text
-              @click="completeDialog = false"
-          >
-            Cancel
           </v-btn>
         </v-card-actions>
       </v-card>
