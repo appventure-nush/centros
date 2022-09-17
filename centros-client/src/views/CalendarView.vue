@@ -7,11 +7,11 @@
         </v-col>
       </v-row>
 
-<!--      <v-row dense no-gutters>-->
-<!--        <v-col>-->
-<!--          <p>Last Updated: {{ getReadTime() }}</p>-->
-<!--        </v-col>-->
-<!--      </v-row>-->
+      <!--      <v-row dense no-gutters>-->
+      <!--        <v-col>-->
+      <!--          <p>Last Updated: {{ getReadTime() }}</p>-->
+      <!--        </v-col>-->
+      <!--      </v-row>-->
 
 
       <v-row dense no-gutters>
@@ -23,7 +23,8 @@
 
       <v-row dense no-gutters>
         <v-col>
-          <p>Canteen College Counselling - Find Mr West at the canteen at 1130-1300, say hello, and ask questions about your university journeys and dreams.</p>
+          <p>Canteen College Counselling - Find Mr West at the canteen at 1130-1300, say hello, and ask questions about
+            your university journeys and dreams.</p>
         </v-col>
       </v-row>
 
@@ -84,7 +85,8 @@
                   first-interval="15"
                   interval-count="19">
                 <template v-slot:interval="{past, weekday}">
-                  <div class="fill-height" style="background: #e6e6e6" v-if="past || weekday === 0 || weekday === 6"></div>
+                  <div class="fill-height" style="background: #e6e6e6"
+                       v-if="past || weekday === 0 || weekday === 6"></div>
                 </template>
               </v-calendar>
             </v-col>
@@ -718,8 +720,10 @@ export default {
 
         // meeting must be at least 30 minutes
         let end = Math.max(mouseRounded, this.createStart + 30 * 60 * 1000)
-        // max duration of meeting is 30 * maxInterval minutes
-        this.newMeeting.end = Math.min(end, this.createStart + maxContiguousMeetingInterval * 30 * 60 * 1000)
+        this.newMeeting.end = end
+        // for students max duration of meeting is 30 * maxInterval minutes
+        if (!this.$store.state.user.isAdmin)
+          this.newMeeting.end = Math.min(this.newMeeting.end, this.createStart + maxContiguousMeetingInterval * 30 * 60 * 1000)
 
         // limit drag so as to not collide with future events
         for (let i = 0; i < this.events.length - 1; i++) {
