@@ -29,6 +29,7 @@ jobs:
       - name: Push image to AppVenture registry
         uses: docker/build-push-action@v1
         with:
+          file: centros-server/Dockerfile
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           registry: registry.nush.app

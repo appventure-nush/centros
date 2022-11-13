@@ -7,4 +7,4 @@ WORKDIR /home/centros/centros
 COPY --chown=centros:root . .
 WORKDIR server
 
-RUN npm ci
+RUN npm i
