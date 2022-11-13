@@ -124,7 +124,6 @@
             </v-list-item-icon>
             <v-list-item-content>{{ selectedEvent.description }}</v-list-item-content>
           </v-list-item>
-
           <v-list-item v-if="selectedEvent.venue">
             <v-list-item-icon>
               <v-icon>mdi-map-marker</v-icon>
