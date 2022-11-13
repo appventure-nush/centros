@@ -5,6 +5,6 @@ USER centros
 RUN mkdir /home/centros/centros
 WORKDIR /home/centros/centros
 COPY --chown=centros:root . .
-WORKDIR server
+WORKDIR centros-server
 
 RUN npm i
