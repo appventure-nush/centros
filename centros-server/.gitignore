@@ -103,5 +103,3 @@ typings/
 .tern-port
 
 package-lock.json
-
-src/data/*
