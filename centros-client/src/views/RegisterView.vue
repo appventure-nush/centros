@@ -1,71 +1,135 @@
 <template>
-  <v-container>
-    <v-row>
-      <v-col class="col-md-12 col-lg-5">
-        <h1 class="text-h2 font-weight-bold">You're Almost There!</h1>
-        <h3>Kindly fill up the information below and we're good to go!</h3>
+  <v-container fill-height fluid>
+    <mq-layout mq="mobile">
+      <v-row fill-width>
+        <v-col class="col-md-12 col-lg-5">
+          <h1 class="font-weight-bold" style="font-size: 12vw">You're Almost There!</h1>
+          <h3>Kindly fill up the information below and we're good to go!</h3>
 
-        <v-form
-            ref="form"
-            class="mt-12">
-          <v-select
-              :items="houseItems"
-              label="House"
-              v-model="house"
-              :rules="houseInputRules"
-              outlined></v-select>
+          <v-form
+              ref="form"
+              class="mt-12">
+            <v-select
+                :items="houseItems"
+                label="House"
+                v-model="house"
+                :rules="houseInputRules"
+                outlined></v-select>
 
-          <v-select
-              :items="yearItems"
-              label="Year"
-              v-model="year"
-              :rules="yearInputRules"
-              outlined></v-select>
+            <v-select
+                :items="yearItems"
+                label="Year"
+                v-model="year"
+                :rules="yearInputRules"
+                outlined></v-select>
 
-          <v-select
-              :items="mentorItems"
-              v-model="mentorClass"
-              :rules="mentorInputRules"
-              label="Mentor Group"
-              outlined></v-select>
+            <v-select
+                :items="mentorItems"
+                v-model="mentorClass"
+                :rules="mentorInputRules"
+                label="Mentor Group"
+                outlined></v-select>
 
-          <v-autocomplete
-              label="Major"
-              chips
-              deletable-chips
-              outlined
-              multiple
-              v-model="majors"
-              :rules="majorInputRules"
-              :items="majorItems"
-          ></v-autocomplete>
+            <v-autocomplete
+                label="Major"
+                chips
+                deletable-chips
+                outlined
+                multiple
+                v-model="majors"
+                :rules="majorInputRules"
+                :items="majorItems"
+            ></v-autocomplete>
 
-          <v-autocomplete
-              label="Honours"
-              chips
-              deletable-chips
-              outlined
-              multiple
-              v-model="honours"
-              :rules="[majorsAndHonoursRule]"
-              :items="majorItems"
-          ></v-autocomplete>
+            <v-autocomplete
+                label="Honours"
+                chips
+                deletable-chips
+                outlined
+                multiple
+                v-model="honours"
+                :rules="[majorsAndHonoursRule]"
+                :items="majorItems"
+            ></v-autocomplete>
 
-          <v-btn
-              class="mr-4"
-              color="primary"
-              @click="submit">
-            submit
-          </v-btn>
-        </v-form>
-      </v-col>
+            <v-btn
+                class="mr-4"
+                color="primary"
+                @click="submit" style="width: 100%">
+              submit
+            </v-btn>
+          </v-form>
+        </v-col>
+      </v-row>
+    </mq-layout>
+    <mq-layout mq="tablet+">
+      <v-row fill-width>
+        <v-col class="col-md-12 col-lg-5">
+          <h1 class="text-h2 font-weight-bold">You're Almost There!</h1>
+          <h3>Kindly fill up the information below and we're good to go!</h3>
 
-      <v-spacer></v-spacer>
+          <v-form
+              ref="form"
+              class="mt-12">
+            <v-select
+                :items="houseItems"
+                label="House"
+                v-model="house"
+                :rules="houseInputRules"
+                outlined></v-select>
 
-      <v-col class="col-lg-6 mt-12">
-        <v-img :src="require('../assets/registration_art.svg')"></v-img>
-      </v-col>
-    </v-row>
+            <v-select
+                :items="yearItems"
+                label="Year"
+                v-model="year"
+                :rules="yearInputRules"
+                outlined></v-select>
+
+            <v-select
+                :items="mentorItems"
+                v-model="mentorClass"
+                :rules="mentorInputRules"
+                label="Mentor Group"
+                outlined></v-select>
+
+            <v-autocomplete
+                label="Major"
+                chips
+                deletable-chips
+                outlined
+                multiple
+                v-model="majors"
+                :rules="majorInputRules"
+                :items="majorItems"
+            ></v-autocomplete>
+
+            <v-autocomplete
+                label="Honours"
+                chips
+                deletable-chips
+                outlined
+                multiple
+                v-model="honours"
+                :rules="[majorsAndHonoursRule]"
+                :items="majorItems"
+            ></v-autocomplete>
+
+            <v-btn
+                class="mr-4"
+                color="primary"
+                @click="submit">
+              submit
+            </v-btn>
+          </v-form>
+        </v-col>
+
+        <v-spacer></v-spacer>
+
+        <v-col class="col-lg-6 mt-12">
+          <v-img :src="require('../assets/registration_art.svg')"></v-img>
+        </v-col>
+      </v-row>
+    </mq-layout>
   </v-container>
 </template>
 

@@ -1,418 +1,835 @@
 <template>
-  <v-container fluid class="px-12">
-    <div class="pa-4">
-      <v-row>
-        <v-col>
-          <h1 class="text-h4 font-weight-bold">Meeting Schedule</h1>
-        </v-col>
-      </v-row>
+  <v-container fluid class="px-8">
+    <mq-layout mq="mobile">
+      <div class="py-2">
+        <v-row>
+          <v-col>
+            <h1 class="font-weight-bold" style="font-size: 8vw">Meeting Schedule</h1>
+          </v-col>
+        </v-row>
 
-      <!--      <v-row dense no-gutters>-->
-      <!--        <v-col>-->
-      <!--          <p>Last Updated: {{ getReadTime() }}</p>-->
-      <!--        </v-col>-->
-      <!--      </v-row>-->
+        <!--      <v-row dense no-gutters>-->
+        <!--        <v-col>-->
+        <!--          <p>Last Updated: {{ getReadTime() }}</p>-->
+        <!--        </v-col>-->
+        <!--      </v-row>-->
 
 
-      <v-row dense no-gutters>
-        <v-col>
-          <p>This site is for scheduling appointments with Mr West only. You can schedule appointments with Mr Allan <a
-              href="https://tinyurl.com/see-mr-allan">here</a></p>
-        </v-col>
-      </v-row>
+        <v-row dense no-gutters>
+          <v-col>
+            <p>This site is for scheduling appointments with Mr West only. You can schedule appointments with Mr Allan <a
+                href="https://tinyurl.com/see-mr-allan">here</a></p>
+          </v-col>
+        </v-row>
 
-      <v-row dense no-gutters>
-        <v-col>
-          <p>Canteen College Counselling - Find Mr West at the canteen at 1130-1300, say hello, and ask questions about
-            your university journeys and dreams.</p>
-        </v-col>
-      </v-row>
+        <v-row dense no-gutters>
+          <v-col>
+            <p>Canteen College Counselling - Find Mr West at the canteen at 1130-1300, say hello, and ask questions about
+              your university journeys and dreams.</p>
+          </v-col>
+        </v-row>
 
-      <v-row>
-        <v-col>
-          <MeetingCard
-              v-for="meeting in pendingMeetings"
-              :key="meeting.meeting_id"
-              :name="meeting.name"
-              :email="meeting.email"
-              :description="meeting.description"
-              :date="getDateFromMysqlDate(meeting.date)"
-              :start-time="getDateFromMysqlTime(meeting.start_time)"
-              :end-time="getDateFromMysqlTime(meeting.end_time)"
-          >
+        <v-row>
+          <v-col>
+            <MeetingCard
+                v-for="meeting in pendingMeetings"
+                :key="meeting.meeting_id"
+                :name="meeting.name"
+                :email="meeting.email"
+                :description="meeting.description"
+                :date="getDateFromMysqlDate(meeting.date)"
+                :start-time="getDateFromMysqlTime(meeting.start_time)"
+                :end-time="getDateFromMysqlTime(meeting.end_time)"
+            >
 
-          </MeetingCard>
-        </v-col>
-      </v-row>
+            </MeetingCard>
+          </v-col>
+        </v-row>
 
-      <v-row>
-        <v-col>
-          <v-row>
-            <v-container fluid class="d-flex align-center justify-center">
-              <v-btn icon class="ml-auto" @click="goToPreviousPage">
-                <v-icon>mdi-chevron-left</v-icon>
-              </v-btn>
-              <p class="ma-0">{{ currDateFormatted() }}</p>
-              <v-btn icon @click="goToNextPage">
-                <v-icon>mdi-chevron-right</v-icon>
-              </v-btn>
-              <v-btn class="ml-auto" icon @click="changeCalendarMode">
-                <v-icon>mdi-calendar-month-outline</v-icon>
-              </v-btn>
-            </v-container>
-          </v-row>
+        <v-row>
+          <v-col>
+            <v-row>
+              <v-container fluid class="d-flex align-center justify-center">
+                <v-btn icon class="ml-auto" @click="goToPreviousPage">
+                  <v-icon>mdi-chevron-left</v-icon>
+                </v-btn>
+                <p class="ma-0">{{ currDateFormatted() }}</p>
+                <v-btn icon @click="goToNextPage">
+                  <v-icon>mdi-chevron-right</v-icon>
+                </v-btn>
+                <v-btn class="ml-auto" icon @click="changeCalendarMode">
+                  <v-icon>mdi-calendar-month-outline</v-icon>
+                </v-btn>
+              </v-container>
+            </v-row>
 
-          <v-row>
-            <v-col>
-              <v-calendar
-                  :start="new Date()"
-                  ref="calendar"
-                  event-overlap-mode="column"
-                  v-model="targetDate"
-                  style="height: auto; width: auto;"
-                  :type="mode"
-                  :events="events"
-                  color="primary"
-                  :event-ripple="false"
-                  @click:event="showMeetingDetails"
-                  @click:date="viewWeek"
-                  @mousedown:event="startDrag"
-                  @mousedown:time="startTime"
-                  @mousemove:time="mouseMove"
-                  @mouseup:time="endDrag"
-                  @mouseleave.native="cancelDrag"
-                  interval-minutes="30"
-                  first-interval="15"
-                  interval-count="19">
-                <template v-slot:interval="{past, weekday}">
-                  <div class="fill-height" style="background: #e6e6e6"
-                       v-if="past || weekday === 0 || weekday === 6"></div>
-                </template>
-              </v-calendar>
-            </v-col>
-          </v-row>
-        </v-col>
-      </v-row>
-    </div>
+            <v-row>
+              <v-col>
+                <v-calendar-daily
+                    :start="new Date()"
+                    ref="calendar"
+                    event-overlap-mode="column"
+                    v-model="targetDate"
+                    style="height: auto; width: auto;"
+                    :type="mode"
+                    :events="events"
+                    color="primary"
+                    :event-ripple="false"
+                    @click:event="showMeetingDetails"
+                    @click:date="viewWeek"
+                    @mousedown:event="startDrag"
+                    @mousedown:time="startTime"
+                    @mousemove:time="mouseMove"
+                    @mouseup:time="endDrag"
+                    @mouseleave.native="cancelDrag"
+                    interval-minutes="30"
+                    first-interval="15"
+                    interval-count="19">
+                  <template v-slot:interval="{past, weekday}">
+                    <div class="fill-height" style="background: #e6e6e6"
+                         v-if="past || weekday === 0 || weekday === 6"></div>
+                  </template>
+                </v-calendar-daily>
+              </v-col>
+            </v-row>
+          </v-col>
+        </v-row>
+      </div>
 
-    <div style="height: 60px"></div>
+      <!--<div style="height: 60px"></div>-->
 
-    <v-menu
-        v-model="selectedOpen"
-        :close-on-content-click="false"
-        :activator="selectedElement"
-        offset-x
-    >
-      <v-card
-          width="300"
-          flat
+      <v-menu
+          v-model="selectedOpen"
+          :close-on-content-click="false"
+          :activator="selectedElement"
+          offset-x
       >
-        <v-list>
-          <v-subheader>Booked By</v-subheader>
-          <v-list-item>
-            <v-list-item-icon>
-              <v-icon>mdi-account</v-icon>
-            </v-list-item-icon>
-            <v-list-item-content>
-              <v-list-item-title>{{ selectedEvent.name }}</v-list-item-title>
-              <v-list-item-subtitle>{{ selectedEvent.email }}</v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
-          <v-list-item>
-            <v-list-item-icon>
-              <v-icon>mdi-text</v-icon>
-            </v-list-item-icon>
-            <v-list-item-content>{{ selectedEvent.description }}</v-list-item-content>
-          </v-list-item>
-
-          <v-list-item v-if="selectedEvent.venue">
-            <v-list-item-icon>
-              <v-icon>mdi-map-marker</v-icon>
-            </v-list-item-icon>
-            <v-list-item-content>{{ selectedEvent.venue }}</v-list-item-content>
-          </v-list-item>
-          <v-list-item two-line>
-            <v-list-item-icon>
-              <v-icon>mdi-calendar-clock</v-icon>
-            </v-list-item-icon>
-            <v-list-item-content>
-              <v-list-item-title>{{ getFormattedDate(selectedEvent.start) }}</v-list-item-title>
-              <v-list-item-subtitle>{{ getFormattedTime(selectedEvent.start) }} to
-                {{ getFormattedTime(selectedEvent.end) }}
-              </v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
-
-          <v-list-item>
-            <v-chip :color="meetingStatusToColor[selectedEvent.meeting_status]"
-                    text-color="white">
-              {{ selectedEvent.meeting_status }}
-            </v-chip>
-          </v-list-item>
-        </v-list>
-        <v-card-actions v-if="showCancelMeetingActions">
-          <v-spacer></v-spacer>
-          <v-btn text color="error" @click="cancelDialog = true">Cancel</v-btn>
-        </v-card-actions>
-        <v-card-actions v-if="showConfirmMeetingActions">
-          <v-spacer></v-spacer>
-          <v-btn text color="primary" @click="acceptDialog = true">Accept</v-btn>
-          <v-btn text color="error" @click="declineDialog = true">Decline</v-btn>
-        </v-card-actions>
-        <v-card-actions v-if="showCompleteMeetingActions">
-          <v-spacer></v-spacer>
-          <v-btn text color="primary" @click="completeDialog = true">Mark Completed</v-btn>
-          <v-btn text color="error" @click="declineDialog = true">Cancel</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-menu>
-
-    <v-bottom-sheet
-        hide-overlay
-        persistent
-        ref="bottomSheet"
-        :value="showCreatePrompt"
-        no-click-animation
-        :retain-focus="false">
-      <v-sheet
-          height="80px"
-          class="d-flex justify-center align-center pa-10">
-        New Meeting: {{ meetingDate }} {{ meetingStartTime }} to {{ meetingEndTime }}
-
-        <v-btn
-            class="ml-auto mr-3"
-            color="primary"
-            @click="scheduleDialog = true"
-        >Schedule
-        </v-btn>
-
-        <v-dialog
-            v-model="scheduleDialog"
-            width="700"
+        <v-card
+            width="300"
+            flat
         >
-          <v-card>
-            <v-card-title class="font-weight-bold">
-              Schedule Meeting
-            </v-card-title>
+          <v-list>
+            <v-subheader>Booked By</v-subheader>
+            <v-list-item>
+              <v-list-item-icon>
+                <v-icon>mdi-account</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>{{ selectedEvent.name }}</v-list-item-title>
+                <v-list-item-subtitle>{{ selectedEvent.email }}</v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-icon>
+                <v-icon>mdi-text</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>{{ selectedEvent.description }}</v-list-item-content>
+            </v-list-item>
 
-            <v-card-text>
-              <p>Please provide a short description of what you would like to discuss about.</p>
-              <v-form ref="scheduleForm">
-                <v-text-field
-                    prepend-icon="mdi-pencil"
-                    outlined
-                    v-model="descriptionInput"
-                    dense
-                    :rules="[v => !!v || `Description is required`]"
-                    label="Description"
+            <v-list-item v-if="selectedEvent.venue">
+              <v-list-item-icon>
+                <v-icon>mdi-map-marker</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>{{ selectedEvent.venue }}</v-list-item-content>
+            </v-list-item>
+            <v-list-item two-line>
+              <v-list-item-icon>
+                <v-icon>mdi-calendar-clock</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>{{ getFormattedDate(selectedEvent.start) }}</v-list-item-title>
+                <v-list-item-subtitle>{{ getFormattedTime(selectedEvent.start) }} to
+                  {{ getFormattedTime(selectedEvent.end) }}
+                </v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+
+            <v-list-item>
+              <v-chip :color="meetingStatusToColor[selectedEvent.meeting_status]"
+                      text-color="white">
+                {{ selectedEvent.meeting_status }}
+              </v-chip>
+            </v-list-item>
+          </v-list>
+          <v-card-actions v-if="showCancelMeetingActions">
+            <v-spacer></v-spacer>
+            <v-btn text color="error" @click="cancelDialog = true">Cancel</v-btn>
+          </v-card-actions>
+          <v-card-actions v-if="showConfirmMeetingActions">
+            <v-spacer></v-spacer>
+            <v-btn text color="primary" @click="acceptDialog = true">Accept</v-btn>
+            <v-btn text color="error" @click="declineDialog = true">Decline</v-btn>
+          </v-card-actions>
+          <v-card-actions v-if="showCompleteMeetingActions">
+            <v-spacer></v-spacer>
+            <v-btn text color="primary" @click="completeDialog = true">Mark Completed</v-btn>
+            <v-btn text color="error" @click="declineDialog = true">Cancel</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-menu>
+
+      <v-bottom-sheet
+          hide-overlay
+          persistent
+          ref="bottomSheet"
+          :value="showCreatePrompt"
+          no-click-animation
+          :retain-focus="false">
+        <v-sheet
+            height="80px"
+            class="d-flex justify-center align-center pa-10">
+          New Meeting: {{ meetingDate }} {{ meetingStartTime }} to {{ meetingEndTime }}
+
+          <v-btn
+              class="ml-auto mr-3"
+              color="primary"
+              @click="scheduleDialog = true"
+          >Schedule
+          </v-btn>
+
+          <v-dialog
+              v-model="scheduleDialog"
+              width="700"
+          >
+            <v-card>
+              <v-card-title class="font-weight-bold">
+                Schedule Meeting
+              </v-card-title>
+
+              <v-card-text>
+                <p>Please provide a short description of what you would like to discuss about.</p>
+                <v-form ref="scheduleForm">
+                  <v-text-field
+                      prepend-icon="mdi-pencil"
+                      outlined
+                      v-model="descriptionInput"
+                      dense
+                      :rules="[v => !!v || `Description is required`]"
+                      label="Description"
+                  >
+                  </v-text-field>
+                </v-form>
+              </v-card-text>
+
+              <v-divider></v-divider>
+
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn
+                    text
+                    @click="closeScheduleDialog"
                 >
-                </v-text-field>
-              </v-form>
-            </v-card-text>
+                  Cancel
+                </v-btn>
 
-            <v-divider></v-divider>
+                <v-btn
+                    color="primary"
+                    text
+                    @click="submitMeetingSchedule"
+                >
+                  Confirm
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
 
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn
-                  text
-                  @click="closeScheduleDialog"
+          <v-btn
+              text
+              color="red"
+              @click="cancelScheduleNewMeeting">
+            Cancel
+          </v-btn>
+        </v-sheet>
+      </v-bottom-sheet>
+
+      <v-dialog
+          v-model="acceptDialog"
+          width="700"
+      >
+        <v-card>
+          <v-card-title class="font-weight-bold">
+            Accept Meeting
+          </v-card-title>
+
+          <v-card-text>
+            <p>Where will the meeting take place?</p>
+            <v-form ref="acceptForm">
+              <v-text-field
+                  outlined
+                  prepend-icon="mdi-map-marker"
+                  v-model="venueInput"
+                  dense
+                  :rules="[v => !!v || `A venue is required`]"
+                  label="Venue"
               >
-                Cancel
-              </v-btn>
+              </v-text-field>
+            </v-form>
+          </v-card-text>
 
-              <v-btn
-                  color="primary"
-                  text
-                  @click="submitMeetingSchedule"
+          <v-divider></v-divider>
+
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+                text
+                @click="closeAcceptDialog"
+            >
+              Cancel
+            </v-btn>
+
+            <v-btn
+                color="primary"
+                text
+                @click="submitAcceptMeeting"
+            >
+              Confirm
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <v-dialog
+          v-model="declineDialog"
+          width="700"
+      >
+        <v-card>
+          <v-card-title class="font-weight-bold">
+            Decline Meeting
+          </v-card-title>
+
+          <v-card-text>
+            <p>Please provide a short reason for declining the meeting.</p>
+            <v-form ref="declineForm">
+              <v-text-field
+                  outlined
+                  prepend-icon="mdi-pencil"
+                  v-model="reasonInput"
+                  dense
+                  :rules="[v => !!v || `Short reason is required`]"
+                  label="Reason"
               >
-                Confirm
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
+              </v-text-field>
+            </v-form>
+          </v-card-text>
 
-        <v-btn
-            text
-            color="red"
-            @click="cancelScheduleNewMeeting">
-          Cancel
-        </v-btn>
-      </v-sheet>
-    </v-bottom-sheet>
+          <v-divider></v-divider>
 
-    <v-dialog
-        v-model="acceptDialog"
-        width="700"
-    >
-      <v-card>
-        <v-card-title class="font-weight-bold">
-          Accept Meeting
-        </v-card-title>
-
-        <v-card-text>
-          <p>Where will the meeting take place?</p>
-          <v-form ref="acceptForm">
-            <v-text-field
-                outlined
-                prepend-icon="mdi-map-marker"
-                v-model="venueInput"
-                dense
-                :rules="[v => !!v || `A venue is required`]"
-                label="Venue"
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+                text
+                @click="closeDeclineDialog"
             >
-            </v-text-field>
-          </v-form>
-        </v-card-text>
+              Cancel
+            </v-btn>
 
-        <v-divider></v-divider>
-
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn
-              text
-              @click="closeAcceptDialog"
-          >
-            Cancel
-          </v-btn>
-
-          <v-btn
-              color="primary"
-              text
-              @click="submitAcceptMeeting"
-          >
-            Confirm
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <v-dialog
-        v-model="declineDialog"
-        width="700"
-    >
-      <v-card>
-        <v-card-title class="font-weight-bold">
-          Decline Meeting
-        </v-card-title>
-
-        <v-card-text>
-          <p>Please provide a short reason for declining the meeting.</p>
-          <v-form ref="declineForm">
-            <v-text-field
-                outlined
-                prepend-icon="mdi-pencil"
-                v-model="reasonInput"
-                dense
-                :rules="[v => !!v || `Short reason is required`]"
-                label="Reason"
+            <v-btn
+                color="primary"
+                text
+                @click="submitDeclineMeeting"
             >
-            </v-text-field>
-          </v-form>
-        </v-card-text>
+              Confirm
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
 
-        <v-divider></v-divider>
+      <v-dialog
+          v-model="completeDialog"
+          width="300"
+      >
+        <v-card>
+          <v-card-title class="font-weight-bold">
+            Complete Meeting
+          </v-card-title>
 
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn
-              text
-              @click="closeDeclineDialog"
-          >
-            Cancel
-          </v-btn>
+          <v-card-text>
+            Are you sure you want to complete this meeting?
+          </v-card-text>
 
-          <v-btn
-              color="primary"
-              text
-              @click="submitDeclineMeeting"
-          >
-            Confirm
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+          <v-divider></v-divider>
 
-    <v-dialog
-        v-model="completeDialog"
-        width="300"
-    >
-      <v-card>
-        <v-card-title class="font-weight-bold">
-          Complete Meeting
-        </v-card-title>
-
-        <v-card-text>
-          Are you sure you want to complete this meeting?
-        </v-card-text>
-
-        <v-divider></v-divider>
-
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn
-              color="primary"
-              text
-              @click="submitCompleteMeeting"
-          >
-            Confirm
-          </v-btn>
-
-          <v-btn
-              text
-              @click="completeDialog = false"
-          >
-            Cancel
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <v-dialog
-        v-model="cancelDialog"
-        width="600"
-    >
-      <v-card>
-        <v-card-title class="font-weight-bold">
-          Cancel Meeting
-        </v-card-title>
-
-        <v-card-text>
-          <p>Please provide a short reason for cancelling the meeting.</p>
-          <v-form ref="cancelForm">
-            <v-text-field
-                outlined
-                prepend-icon="mdi-pencil"
-                v-model="reasonInput"
-                dense
-                :rules="[v => !!v || `Short reason is required`]"
-                label="Reason"
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+                color="primary"
+                text
+                @click="submitCompleteMeeting"
             >
-            </v-text-field>
-          </v-form>
-        </v-card-text>
+              Confirm
+            </v-btn>
 
-        <v-divider></v-divider>
+            <v-btn
+                text
+                @click="completeDialog = false"
+            >
+              Cancel
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
 
-        <v-card-actions>
-          <v-spacer></v-spacer>
+      <v-dialog
+          v-model="cancelDialog"
+          width="600"
+      >
+        <v-card>
+          <v-card-title class="font-weight-bold">
+            Cancel Meeting
+          </v-card-title>
+
+          <v-card-text>
+            <p>Please provide a short reason for cancelling the meeting.</p>
+            <v-form ref="cancelForm">
+              <v-text-field
+                  outlined
+                  prepend-icon="mdi-pencil"
+                  v-model="reasonInput"
+                  dense
+                  :rules="[v => !!v || `Short reason is required`]"
+                  label="Reason"
+              >
+              </v-text-field>
+            </v-form>
+          </v-card-text>
+
+          <v-divider></v-divider>
+
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+                text
+                @click="closeCancelDialog"
+            >
+              Cancel
+            </v-btn>
+
+            <v-btn
+                color="primary"
+                text
+                @click="submitCancelMeeting"
+            >
+              Confirm
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </mq-layout>
+    <mq-layout mq="tablet+">
+      <div class="pa-4">
+        <v-row>
+          <v-col>
+            <h1 class="text-h4 font-weight-bold">Meeting Schedule</h1>
+          </v-col>
+        </v-row>
+
+        <!--      <v-row dense no-gutters>-->
+        <!--        <v-col>-->
+        <!--          <p>Last Updated: {{ getReadTime() }}</p>-->
+        <!--        </v-col>-->
+        <!--      </v-row>-->
+
+
+        <v-row dense no-gutters>
+          <v-col>
+            <p>This site is for scheduling appointments with Mr West only. You can schedule appointments with Mr Allan <a
+                href="https://tinyurl.com/see-mr-allan">here</a></p>
+          </v-col>
+        </v-row>
+
+        <v-row dense no-gutters>
+          <v-col>
+            <p>Canteen College Counselling - Find Mr West at the canteen at 1130-1300, say hello, and ask questions about
+              your university journeys and dreams.</p>
+          </v-col>
+        </v-row>
+
+        <v-row>
+          <v-col>
+            <MeetingCard
+                v-for="meeting in pendingMeetings"
+                :key="meeting.meeting_id"
+                :name="meeting.name"
+                :email="meeting.email"
+                :description="meeting.description"
+                :date="getDateFromMysqlDate(meeting.date)"
+                :start-time="getDateFromMysqlTime(meeting.start_time)"
+                :end-time="getDateFromMysqlTime(meeting.end_time)"
+            >
+
+            </MeetingCard>
+          </v-col>
+        </v-row>
+
+        <v-row>
+          <v-col>
+            <v-row>
+              <v-container fluid class="d-flex align-center justify-center">
+                <v-btn icon class="ml-auto" @click="goToPreviousPage">
+                  <v-icon>mdi-chevron-left</v-icon>
+                </v-btn>
+                <p class="ma-0">{{ currDateFormatted() }}</p>
+                <v-btn icon @click="goToNextPage">
+                  <v-icon>mdi-chevron-right</v-icon>
+                </v-btn>
+                <v-btn class="ml-auto" icon @click="changeCalendarMode">
+                  <v-icon>mdi-calendar-month-outline</v-icon>
+                </v-btn>
+              </v-container>
+            </v-row>
+
+            <v-row>
+              <v-col>
+                <v-calendar
+                    :start="new Date()"
+                    ref="calendar"
+                    event-overlap-mode="column"
+                    v-model="targetDate"
+                    style="height: auto; width: auto;"
+                    :type="mode"
+                    :events="events"
+                    color="primary"
+                    :event-ripple="false"
+                    @click:event="showMeetingDetails"
+                    @click:date="viewWeek"
+                    @mousedown:event="startDrag"
+                    @mousedown:time="startTime"
+                    @mousemove:time="mouseMove"
+                    @mouseup:time="endDrag"
+                    @mouseleave.native="cancelDrag"
+                    interval-minutes="30"
+                    first-interval="15"
+                    interval-count="19">
+                  <template v-slot:interval="{past, weekday}">
+                    <div class="fill-height" style="background: #e6e6e6"
+                         v-if="past || weekday === 0 || weekday === 6"></div>
+                  </template>
+                </v-calendar>
+              </v-col>
+            </v-row>
+          </v-col>
+        </v-row>
+      </div>
+
+      <div style="height: 60px"></div>
+
+      <v-menu
+          v-model="selectedOpen"
+          :close-on-content-click="false"
+          :activator="selectedElement"
+          offset-x
+      >
+        <v-card
+            width="300"
+            flat
+        >
+          <v-list>
+            <v-subheader>Booked By</v-subheader>
+            <v-list-item>
+              <v-list-item-icon>
+                <v-icon>mdi-account</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>{{ selectedEvent.name }}</v-list-item-title>
+                <v-list-item-subtitle>{{ selectedEvent.email }}</v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-icon>
+                <v-icon>mdi-text</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>{{ selectedEvent.description }}</v-list-item-content>
+            </v-list-item>
+
+            <v-list-item v-if="selectedEvent.venue">
+              <v-list-item-icon>
+                <v-icon>mdi-map-marker</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>{{ selectedEvent.venue }}</v-list-item-content>
+            </v-list-item>
+            <v-list-item two-line>
+              <v-list-item-icon>
+                <v-icon>mdi-calendar-clock</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>{{ getFormattedDate(selectedEvent.start) }}</v-list-item-title>
+                <v-list-item-subtitle>{{ getFormattedTime(selectedEvent.start) }} to
+                  {{ getFormattedTime(selectedEvent.end) }}
+                </v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+
+            <v-list-item>
+              <v-chip :color="meetingStatusToColor[selectedEvent.meeting_status]"
+                      text-color="white">
+                {{ selectedEvent.meeting_status }}
+              </v-chip>
+            </v-list-item>
+          </v-list>
+          <v-card-actions v-if="showCancelMeetingActions">
+            <v-spacer></v-spacer>
+            <v-btn text color="error" @click="cancelDialog = true">Cancel</v-btn>
+          </v-card-actions>
+          <v-card-actions v-if="showConfirmMeetingActions">
+            <v-spacer></v-spacer>
+            <v-btn text color="primary" @click="acceptDialog = true">Accept</v-btn>
+            <v-btn text color="error" @click="declineDialog = true">Decline</v-btn>
+          </v-card-actions>
+          <v-card-actions v-if="showCompleteMeetingActions">
+            <v-spacer></v-spacer>
+            <v-btn text color="primary" @click="completeDialog = true">Mark Completed</v-btn>
+            <v-btn text color="error" @click="declineDialog = true">Cancel</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-menu>
+
+      <v-bottom-sheet
+          hide-overlay
+          persistent
+          ref="bottomSheet"
+          :value="showCreatePrompt"
+          no-click-animation
+          :retain-focus="false">
+        <v-sheet
+            height="80px"
+            class="d-flex justify-center align-center pa-10">
+          New Meeting: {{ meetingDate }} {{ meetingStartTime }} to {{ meetingEndTime }}
+
+          <v-btn
+              class="ml-auto mr-3"
+              color="primary"
+              @click="scheduleDialog = true"
+          >Schedule
+          </v-btn>
+
+          <v-dialog
+              v-model="scheduleDialog"
+              width="700"
+          >
+            <v-card>
+              <v-card-title class="font-weight-bold">
+                Schedule Meeting
+              </v-card-title>
+
+              <v-card-text>
+                <p>Please provide a short description of what you would like to discuss about.</p>
+                <v-form ref="scheduleForm">
+                  <v-text-field
+                      prepend-icon="mdi-pencil"
+                      outlined
+                      v-model="descriptionInput"
+                      dense
+                      :rules="[v => !!v || `Description is required`]"
+                      label="Description"
+                  >
+                  </v-text-field>
+                </v-form>
+              </v-card-text>
+
+              <v-divider></v-divider>
+
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn
+                    text
+                    @click="closeScheduleDialog"
+                >
+                  Cancel
+                </v-btn>
+
+                <v-btn
+                    color="primary"
+                    text
+                    @click="submitMeetingSchedule"
+                >
+                  Confirm
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+
           <v-btn
               text
-              @click="closeCancelDialog"
-          >
+              color="red"
+              @click="cancelScheduleNewMeeting">
             Cancel
           </v-btn>
+        </v-sheet>
+      </v-bottom-sheet>
 
-          <v-btn
-              color="primary"
-              text
-              @click="submitCancelMeeting"
-          >
-            Confirm
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+      <v-dialog
+          v-model="acceptDialog"
+          width="700"
+      >
+        <v-card>
+          <v-card-title class="font-weight-bold">
+            Accept Meeting
+          </v-card-title>
+
+          <v-card-text>
+            <p>Where will the meeting take place?</p>
+            <v-form ref="acceptForm">
+              <v-text-field
+                  outlined
+                  prepend-icon="mdi-map-marker"
+                  v-model="venueInput"
+                  dense
+                  :rules="[v => !!v || `A venue is required`]"
+                  label="Venue"
+              >
+              </v-text-field>
+            </v-form>
+          </v-card-text>
+
+          <v-divider></v-divider>
+
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+                text
+                @click="closeAcceptDialog"
+            >
+              Cancel
+            </v-btn>
+
+            <v-btn
+                color="primary"
+                text
+                @click="submitAcceptMeeting"
+            >
+              Confirm
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <v-dialog
+          v-model="declineDialog"
+          width="700"
+      >
+        <v-card>
+          <v-card-title class="font-weight-bold">
+            Decline Meeting
+          </v-card-title>
+
+          <v-card-text>
+            <p>Please provide a short reason for declining the meeting.</p>
+            <v-form ref="declineForm">
+              <v-text-field
+                  outlined
+                  prepend-icon="mdi-pencil"
+                  v-model="reasonInput"
+                  dense
+                  :rules="[v => !!v || `Short reason is required`]"
+                  label="Reason"
+              >
+              </v-text-field>
+            </v-form>
+          </v-card-text>
+
+          <v-divider></v-divider>
+
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+                text
+                @click="closeDeclineDialog"
+            >
+              Cancel
+            </v-btn>
+
+            <v-btn
+                color="primary"
+                text
+                @click="submitDeclineMeeting"
+            >
+              Confirm
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <v-dialog
+          v-model="completeDialog"
+          width="300"
+      >
+        <v-card>
+          <v-card-title class="font-weight-bold">
+            Complete Meeting
+          </v-card-title>
+
+          <v-card-text>
+            Are you sure you want to complete this meeting?
+          </v-card-text>
+
+          <v-divider></v-divider>
+
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+                color="primary"
+                text
+                @click="submitCompleteMeeting"
+            >
+              Confirm
+            </v-btn>
+
+            <v-btn
+                text
+                @click="completeDialog = false"
+            >
+              Cancel
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <v-dialog
+          v-model="cancelDialog"
+          width="600"
+      >
+        <v-card>
+          <v-card-title class="font-weight-bold">
+            Cancel Meeting
+          </v-card-title>
+
+          <v-card-text>
+            <p>Please provide a short reason for cancelling the meeting.</p>
+            <v-form ref="cancelForm">
+              <v-text-field
+                  outlined
+                  prepend-icon="mdi-pencil"
+                  v-model="reasonInput"
+                  dense
+                  :rules="[v => !!v || `Short reason is required`]"
+                  label="Reason"
+              >
+              </v-text-field>
+            </v-form>
+          </v-card-text>
+
+          <v-divider></v-divider>
+
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+                text
+                @click="closeCancelDialog"
+            >
+              Cancel
+            </v-btn>
+
+            <v-btn
+                color="primary"
+                text
+                @click="submitCancelMeeting"
+            >
+              Confirm
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </mq-layout>
   </v-container>
 </template>
 
