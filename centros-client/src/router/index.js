@@ -9,7 +9,7 @@ import FileView from "@/views/FileView";
 import ProfileView from "@/views/ProfileView";
 import ReviewView from "@/views/ReviewView";
 import MeetingView from "@/views/MeetingView"
-//import SignInView from "@/views/SignInView";
+import SignInView from "@/views/SignInView";
 
 Vue.use(VueRouter)
 
@@ -17,7 +17,7 @@ const routes = [
     {
         path: '/',
         name: 'signin',
-        component: UniversityView
+        component: SignInView
     },
     {
         path: '/register',
