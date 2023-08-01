@@ -18,7 +18,7 @@
         <v-row dense no-gutters>
           <v-col>
             <p>This site is for scheduling appointments with Mr West only. You can schedule appointments with Mr Allan <a
-                href="https://tinyurl.com/see-mr-allan">here</a></p>
+                href="https://tinyurl.com/meet-mr-allan">here</a></p>
           </v-col>
         </v-row>
 
@@ -433,7 +433,7 @@
         <v-row dense no-gutters>
           <v-col>
             <p>This site is for scheduling appointments with Mr West only. You can schedule appointments with Mr Allan <a
-                href="https://tinyurl.com/see-mr-allan">here</a></p>
+                href="https://tinyurl.com/meet-mr-allan">here</a></p>
           </v-col>
         </v-row>
 
